@@ -21,6 +21,11 @@ class DatabaseModels:
                     first_name TEXT,
                     subscription_tier TEXT DEFAULT 'minimal',
                     tokens_used INTEGER DEFAULT 0,
+                    currency TEXT DEFAULT 'UZS',
+                    theme TEXT DEFAULT 'auto',
+                    phone TEXT,
+                    email TEXT,
+                    notifications_enabled INTEGER DEFAULT 1,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )

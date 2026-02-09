@@ -5,6 +5,7 @@ Moliyaviy operatsiyalar: ovozli xabar tahlili, statistika
 import os
 from datetime import datetime, date, timedelta
 from aiogram import Router, F
+from aiogram.filters import Command
 from aiogram.types import Message, Voice
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
@@ -79,10 +80,16 @@ async def process_voice(message: Message):
             await processing_msg.edit_text("❌ Ovozni taniy olmadim. Iltimos, qaytadan urinib ko'ring.")
             return
         
+        # DEBUG: Whisper natijasi
+        print(f"🎤 DEBUG - Whisper transcription: '{text}'")
+        
         await processing_msg.edit_text(f"✅ Tanildi: <i>{text}</i>\n\n⏳ Tahlil qilmoqdaman...", parse_mode="HTML")
         
         # AI tahlil
         analysis_list, analysis_tokens = await ai_service.analyze_transaction(text)
+        
+        # DEBUG: AI tahlil natijasi
+        print(f"🤖 DEBUG - AI analysis result: {analysis_list}")
         
         if not analysis_list:
             await processing_msg.edit_text(
@@ -229,7 +236,9 @@ async def show_statistics(message: Message):
     recent_text = ""
     for trans in recent:
         emoji = "💵" if trans["type"] == "income" else "💸"
-        recent_text += f"{emoji} {trans['amount']:,} - {trans['category']}\n"
+        description = trans.get('description', '')
+        desc_text = f" - {description}" if description else ""
+        recent_text += f"{emoji} {trans['amount']:,} so'm ({trans['category']}){desc_text}\n"
     
     if not recent_text:
         recent_text = "Ma'lumot yo'q"
@@ -243,3 +252,43 @@ async def show_statistics(message: Message):
         f"📝 <b>Oxirgi operatsiyalar:</b>\n{recent_text}",
         parse_mode="HTML"
     )
+
+@router.message(Command("export"))
+async def export_transactions(message: Message):
+    """Tranzaksiyalarni CSV formatida export qilish"""
+    from aiogram.types import BufferedInputFile
+    from utils.export import export_transactions_to_csv, format_export_filename
+    
+    user_id = message.from_user.id
+    
+    processing_msg = await message.answer("📊 Tranzaksiyalarni tayyorlamoqdaman...")
+    
+    try:
+        # Barcha tranzaksiyalarni olish (oxirgi 100 ta)
+        transactions = await db.get_transactions(user_id, limit=100)
+        
+        if not transactions:
+            await processing_msg.edit_text("📭 Hozircha tranzaksiyalar yo'q.")
+            return
+        
+        # CSV yaratish
+        csv_file = export_transactions_to_csv(transactions, message.from_user.first_name)
+        filename = format_export_filename(user_id)
+        
+        # Faylni yuborish
+        file = BufferedInputFile(csv_file.read(), filename=filename)
+        
+        await message.answer_document(
+            file,
+            caption=f"📊 <b>Tranzaksiyalar eksporti</b>\n\n"
+                    f"📝 Jami: {len(transactions)} ta tranzaksiya\n"
+                    f"📅 Sana: {date.today()}\n\n"
+                    f"<i>Excel'da ochishingiz mumkin</i>",
+            parse_mode="HTML"
+        )
+        
+        await processing_msg.delete()
+    
+    except Exception as e:
+        print(f"❌ Export xato: {e}")
+        await processing_msg.edit_text("❌ Export qilishda xatolik yuz berdi.")

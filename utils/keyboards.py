@@ -121,3 +121,142 @@ def get_back_button() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="◀️ Orqaga", callback_data="back_main")
     )
     return builder.as_markup()
+
+def get_goal_actions_keyboard(goal_id: int) -> InlineKeyboardMarkup:
+    """Maqsad uchun action tugmalari"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="💰 Pul qo'shish", callback_data=f"goal_add_money_{goal_id}")
+    )
+    builder.row(
+        InlineKeyboardButton(text="✏️ Tahrirlash", callback_data=f"goal_edit_{goal_id}"),
+        InlineKeyboardButton(text="🗑️ O'chirish", callback_data=f"goal_delete_{goal_id}")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data="goal_list")
+    )
+    return builder.as_markup()
+
+def get_goal_edit_menu(goal_id: int) -> InlineKeyboardMarkup:
+    """Maqsad tahrirlash menyusi"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="📝 Nomini o'zgartirish", callback_data=f"goal_edit_title_{goal_id}")
+    )
+    builder.row(
+        InlineKeyboardButton(text="💰 Summasini o'zgartirish", callback_data=f"goal_edit_amount_{goal_id}")
+    )
+    builder.row(
+        InlineKeyboardButton(text="📅 Muddatni o'zgartirish", callback_data=f"goal_edit_deadline_{goal_id}")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data=f"goal_view_{goal_id}")
+    )
+    return builder.as_markup()
+
+def get_confirmation_keyboard(action: str, item_id: int) -> InlineKeyboardMarkup:
+    """Tasdiqlash dialogi"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="✅ Ha", callback_data=f"confirm_{action}_{item_id}"),
+        InlineKeyboardButton(text="❌ Yo'q", callback_data=f"cancel_{action}_{item_id}")
+    )
+    return builder.as_markup()
+
+def get_settings_menu() -> InlineKeyboardMarkup:
+    """Sozlamalar menyusi"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="💱 Valyuta", callback_data="settings_currency")
+    )
+    builder.row(
+        InlineKeyboardButton(text="🎨 Mavzu", callback_data="settings_theme")
+    )
+    builder.row(
+        InlineKeyboardButton(text="📧 Profil", callback_data="settings_profile")
+    )
+    builder.row(
+        InlineKeyboardButton(text="🔔 Bildirishnomalar", callback_data="settings_notifications")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data="back_main")
+    )
+    return builder.as_markup()
+
+def get_currency_menu(current: str = "UZS") -> InlineKeyboardMarkup:
+    """Valyuta tanlash menyusi"""
+    builder = InlineKeyboardBuilder()
+    
+    currencies = [
+        ("🇺🇿 O'zbek so'mi (UZS)", "UZS"),
+        ("🇺🇸 Dollar (USD)", "USD"),
+        ("🇷🇺 Rubl (RUB)", "RUB")
+    ]
+    
+    for name, code in currencies:
+        mark = "✅ " if code == current else ""
+        builder.row(
+            InlineKeyboardButton(text=f"{mark}{name}", callback_data=f"set_currency_{code}")
+        )
+    
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data="back_settings")
+    )
+    return builder.as_markup()
+
+def get_theme_menu(current: str = "auto") -> InlineKeyboardMarkup:
+    """Mavzu tanlash menyusi"""
+    builder = InlineKeyboardBuilder()
+    
+    themes = [
+        ("☀️ Yorug'", "light"),
+        ("🌙 Qorong'i", "dark"),
+        ("🔄 Avtomatik", "auto")
+    ]
+    
+    for name, code in themes:
+        mark = "✅ " if code == current else ""
+        builder.row(
+            InlineKeyboardButton(text=f"{mark}{name}", callback_data=f"set_theme_{code}")
+        )
+    
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data="back_settings")
+    )
+    return builder.as_markup()
+
+def get_notifications_menu(enabled: bool = True) -> InlineKeyboardMarkup:
+    """Bildirishnomalar menyusi"""
+    builder = InlineKeyboardBuilder()
+    
+    status = "🔔 Yoqilgan" if enabled else "🔕 O'chirilgan"
+    action = "off" if enabled else "on"
+    button_text = "🔕 O'chirish" if enabled else "🔔 Yoqish"
+    
+    builder.row(
+        InlineKeyboardButton(text=f"Hozirgi holat: {status}", callback_data="noop")
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text=button_text, 
+            callback_data=f"set_notifications_{action}"
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data="back_settings")
+    )
+    return builder.as_markup()
+
+def get_profile_menu() -> InlineKeyboardMarkup:
+    """Profil tahrirlash menyusi"""
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="📱 Telefon raqam", callback_data="profile_edit_phone")
+    )
+    builder.row(
+        InlineKeyboardButton(text="📧 Email", callback_data="profile_edit_email")
+    )
+    builder.row(
+        InlineKeyboardButton(text="◀️ Orqaga", callback_data="back_settings")
+    )
+    return builder.as_markup()

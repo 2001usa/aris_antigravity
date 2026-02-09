@@ -3,9 +3,10 @@ Start Handler
 /start va /help buyruqlari, tarif tanlash
 """
 from aiogram import Router, F
-from aiogram.filters import Command
-from aiogram.types import Message, CallbackQuery
+from aiogram.filters import Command, StateFilter
+from aiogram.types import Message, CallbackQuery, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from database.db import Database
 from utils.keyboards import get_main_menu, get_subscription_menu
@@ -83,20 +84,6 @@ async def cmd_help(message: Message):
     )
     
     await message.answer(help_text, parse_mode="HTML")
-
-@router.message(Command("settings"))
-async def cmd_settings(message: Message):
-    """Sozlamalar"""
-    user_id = message.from_user.id
-    
-    # Tarif ma'lumotlari
-    status = await sub_manager.format_subscription_status(user_id)
-    
-    await message.answer(
-        f"⚙️ <b>Sozlamalar</b>\n\n"
-        f"{status}",
-        parse_mode="HTML"
-    )
 
 @router.message(Command("admin"))
 async def cmd_admin(message: Message):
@@ -191,6 +178,29 @@ async def cmd_users(message: Message):
     text += f"\n📊 Ko'rsatildi: {len(users)} ta"
     
     await message.answer(text, parse_mode="HTML")
+
+@router.message(Command("token"))
+async def cmd_token(message: Message, state: FSMContext):
+    """Token hisoblash buyrug'i"""
+    from utils.token_counter import format_token_info
+    
+    await message.answer(
+        "📊 <b>Token Hisoblash</b>\n\n"
+        "Matn yuboring, men sizga taxminiy token sonini ko'rsataman:",
+        parse_mode="HTML"
+    )
+    await state.set_state("waiting_for_token_text")
+
+@router.message(F.text, StateFilter("waiting_for_token_text"))
+async def token_text_received(message: Message, state: FSMContext):
+    """Token hisoblash uchun matn qabul qilindi"""
+    from utils.token_counter import format_token_info
+    
+    text = message.text
+    result = format_token_info(text, language="uzbek")
+    
+    await message.answer(result, parse_mode="HTML")
+    await state.clear()
 
 @router.callback_query(F.data == "back_main")
 async def back_to_main(callback: CallbackQuery):

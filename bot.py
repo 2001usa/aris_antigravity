@@ -15,7 +15,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 import config
 from database.models import DatabaseModels
-from handlers import start, finance, goals, diary, reports
+from handlers import start, finance, goals, diary, reports, settings
 
 # Logging sozlash
 logging.basicConfig(
@@ -63,6 +63,7 @@ async def main():
     dp.include_router(start.router)
     dp.include_router(finance.router)
     dp.include_router(goals.router)
+    dp.include_router(settings.router)
     dp.include_router(diary.router)
     dp.include_router(reports.router)
     

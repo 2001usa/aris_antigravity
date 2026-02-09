@@ -99,6 +99,14 @@ TRANSACTION_ANALYSIS_PROMPT = """Matndan moliyaviy ma'lumotlarni ajratib, JSON a
 
 Matn: {text}
 
+MUHIM - So'z bilan yozilgan sonlarni raqamga o'giring:
+- "bir" = 1, "ikki" = 2, "uch" = 3, "to'rt/tort" = 4, "besh" = 5
+- "olti" = 6, "yetti" = 7, "sakkiz" = 8, "to'qqiz/toqqiz" = 9, "o'n/on" = 10
+- "yigirma" = 20, "o'ttiz/ottiz" = 30, "qirq" = 40, "ellik" = 50
+- "yuz" = 100, "ming" = 1000, "million" = 1000000
+- "besh ming" = 5000, "o'n ming" = 10000, "yuz ming" = 100000
+- "uch million" = 3000000, "ikki yarim million" = 2500000
+
 Agar bir nechta tranzaksiya bo'lsa, array ichida qaytaring:
 [
   {{"type": "expense", "amount": 10000, "category": "Transport", "description": "Taxi"}},
