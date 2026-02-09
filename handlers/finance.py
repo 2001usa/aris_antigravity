@@ -137,7 +137,13 @@ MENU_BUTTONS = [
     "📝 Kundalik", "📈 Hisobotlar", "⚙️ Sozlamalar"
 ]
 
-@router.message(F.text & ~F.text.startswith("/") & ~F.text.in_(MENU_BUTTONS))
+@router.message(
+    F.text & 
+    ~F.text.startswith("/") & 
+    ~F.text.in_(MENU_BUTTONS) &
+    (F.text.contains("*") | F.text.contains("so'm") | F.text.contains("som") | 
+     F.text.contains("ming") | F.text.contains("million") | F.text.contains("k"))
+)
 async def process_text_transaction(message: Message):
     """Matnli moliyaviy xabarni qayta ishlash"""
     user_id = message.from_user.id
