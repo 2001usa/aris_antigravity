@@ -131,7 +131,7 @@ async def process_voice(message: Message):
         print(f"❌ Voice processing xato: {e}")
         await processing_msg.edit_text("❌ Xatolik yuz berdi. Iltimos, qaytadan urinib ko'ring.")
 
-@router.message(F.text.startswith("💰") | F.text.contains("so'm") | F.text.contains("som"))
+@router.message(F.text & ~F.text.startswith("/"))
 async def process_text_transaction(message: Message):
     """Matnli moliyaviy xabarni qayta ishlash"""
     user_id = message.from_user.id
