@@ -95,60 +95,35 @@ GROQ_WHISPER_MODEL = "whisper-large-v3"
 GEMINI_MODEL = "gemini-2.0-flash-exp"
 
 # Prompt shablonlari
-TRANSACTION_ANALYSIS_PROMPT = """
-Siz moliyaviy yordamchisiz. Foydalanuvchi ovozli xabar yubordi va u matnga o'girildi.
-Sizning vazifangiz: matndan moliyaviy ma'lumotlarni ajratib olish.
+TRANSACTION_ANALYSIS_PROMPT = """Matndan moliyaviy ma'lumot ajratib, JSON qaytaring:
 
 Matn: {text}
 
-Quyidagi formatda JSON qaytaring:
-{{
-    "type": "income" yoki "expense",
-    "amount": raqam (faqat raqam, so'm belgisisiz),
-    "category": kategoriya nomi,
-    "description": qisqa tavsif
-}}
+Format:
+{{"type": "income/expense", "amount": raqam, "category": "kategoriya", "description": "tavsif"}}
 
-Kategoriyalar:
-Chiqim: Oziq-ovqat, Transport, Uy-joy, Sog'liq, Ta'lim, O'yin-kulgi, Kiyim, Aloqa, Boshqa
+Kategoriyalar - Chiqim: Oziq-ovqat, Transport, Uy-joy, Sog'liq, Ta'lim, O'yin-kulgi, Kiyim, Aloqa, Boshqa
 Kirim: Maosh, Biznes, Sovg'a, Investitsiya, Boshqa
 
-Faqat JSON qaytaring, boshqa hech narsa yozmaslik kerak.
-"""
+Faqat JSON, boshqa hech narsa."""
 
-DIARY_ANALYSIS_PROMPT = """
-Siz psixolog yordamchisiz. Foydalanuvchi kundalik yozdi.
+DIARY_ANALYSIS_PROMPT = """Kundalik tahlil (3-4 jumla):
 
-Kundalik: {text}
+{text}
 
-Qisqa tahlil bering (3-4 jumla):
-1. Asosiy kayfiyat
-2. Muhim voqealar
-3. Qisqa maslahat
+1. Kayfiyat 2. Muhim voqea 3. Maslahat"""
 
-O'zbekcha javob bering.
-"""
+WEEKLY_REPORT_PROMPT = """Haftalik tahlil (5 jumla):
 
-WEEKLY_REPORT_PROMPT = """
-Siz moliyaviy tahlilchisiz. Haftalik hisobot tayyorlang.
+Kirim: {total_income} | Chiqim: {total_expense} | Balans: {balance}
+Eng ko'p: {top_category}
 
-Ma'lumotlar:
-- Jami kirim: {total_income} so'm
-- Jami chiqim: {total_expense} so'm
-- Balans: {balance} so'm
-- Eng ko'p chiqim: {top_category}
+Tahlil va maslahat bering."""
 
-Qisqa tahlil va maslahat bering (5-6 jumla). O'zbekcha yozing.
-"""
+MONTHLY_REPORT_PROMPT = """Oylik hisobot (8-10 jumla):
 
-MONTHLY_REPORT_PROMPT = """
-Siz moliyaviy tahlilchisiz. Oylik hisobot tayyorlang.
+Kirim: {total_income} | Chiqim: {total_expense} | Balans: {balance}
+Maqsadlar: {goals_progress}
 
-Ma'lumotlar:
-- Jami kirim: {total_income} so'm
-- Jami chiqim: {total_expense} so'm
-- Balans: {balance} so'm
-- Maqsadlar: {goals_progress}
+Batafsil tahlil va strategiya."""
 
-Batafsil tahlil va strategik maslahatlar bering (10-12 jumla). O'zbekcha yozing.
-"""
