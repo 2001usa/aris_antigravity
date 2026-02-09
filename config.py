@@ -20,9 +20,8 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 DATABASE_PATH = os.getenv("DATABASE_PATH", "database/aris.db")
 
 # Admin Users (user_id ro'yxati)
-ADMIN_USERS = [7586510077
-    # Admin user ID'larini bu yerga qo'shing
-    # Misol: 123456789, 987654321
+ADMIN_USERS = [
+    7586510077,  # @Aslbek_1203
 ]
 
 # Subscription Tiers
