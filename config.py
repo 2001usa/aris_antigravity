@@ -95,17 +95,23 @@ GROQ_WHISPER_MODEL = "whisper-large-v3"
 GEMINI_MODEL = "gemini-2.0-flash-exp"
 
 # Prompt shablonlari
-TRANSACTION_ANALYSIS_PROMPT = """Matndan moliyaviy ma'lumot ajratib, JSON qaytaring:
+TRANSACTION_ANALYSIS_PROMPT = """Matndan moliyaviy ma'lumotlarni ajratib, JSON array qaytaring:
 
 Matn: {text}
 
-Format:
-{{"type": "income/expense", "amount": raqam, "category": "kategoriya", "description": "tavsif"}}
+Agar bir nechta tranzaksiya bo'lsa, array ichida qaytaring:
+[
+  {{"type": "expense", "amount": 10000, "category": "Transport", "description": "Taxi"}},
+  {{"type": "expense", "amount": 5000, "category": "Oziq-ovqat", "description": "Non"}}
+]
+
+Agar bitta bo'lsa:
+[{{"type": "expense", "amount": 10000, "category": "Oziq-ovqat", "description": "Non"}}]
 
 Kategoriyalar - Chiqim: Oziq-ovqat, Transport, Uy-joy, Sog'liq, Ta'lim, O'yin-kulgi, Kiyim, Aloqa, Boshqa
 Kirim: Maosh, Biznes, Sovg'a, Investitsiya, Boshqa
 
-Faqat JSON, boshqa hech narsa."""
+Faqat JSON array, boshqa hech narsa."""
 
 DIARY_ANALYSIS_PROMPT = """Kundalik tahlil (3-4 jumla):
 

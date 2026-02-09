@@ -63,27 +63,37 @@ class AIService:
             print(f"❌ Whisper xato: {e}")
             return None, 0
     
-    async def analyze_transaction(self, text: str) -> Tuple[Optional[Dict], int]:
+    async def analyze_transaction(self, text: str) -> Tuple[Optional[list], int]:
         """
-        Moliyaviy matnni tahlil qilish
-        Returns: (tahlil_natijasi, ishlatilgan_tokenlar)
+        Moliyaviy matnni tahlil qilish (bir yoki bir nechta tranzaksiya)
+        Returns: (tranzaksiyalar_ro'yxati, ishlatilgan_tokenlar)
         """
         prompt = config.TRANSACTION_ANALYSIS_PROMPT.format(text=text)
         
         # Groq 1 bilan urinish
         result, tokens = await self._call_groq(prompt, self.groq_client_1)
         if result:
-            return self._parse_json_response(result), tokens
+            parsed = self._parse_json_response(result)
+            # Agar array bo'lmasa, array qilib qaytarish
+            if parsed and not isinstance(parsed, list):
+                parsed = [parsed]
+            return parsed, tokens
         
         # Groq 2 bilan urinish
         result, tokens = await self._call_groq(prompt, self.groq_client_2)
         if result:
-            return self._parse_json_response(result), tokens
+            parsed = self._parse_json_response(result)
+            if parsed and not isinstance(parsed, list):
+                parsed = [parsed]
+            return parsed, tokens
         
         # Gemini bilan urinish
         result, tokens = await self._call_gemini(prompt)
         if result:
-            return self._parse_json_response(result), tokens
+            parsed = self._parse_json_response(result)
+            if parsed and not isinstance(parsed, list):
+                parsed = [parsed]
+            return parsed, tokens
         
         return None, 0
     

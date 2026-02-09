@@ -82,9 +82,9 @@ async def process_voice(message: Message):
         await processing_msg.edit_text(f"✅ Tanildi: <i>{text}</i>\n\n⏳ Tahlil qilmoqdaman...", parse_mode="HTML")
         
         # AI tahlil
-        analysis, analysis_tokens = await ai_service.analyze_transaction(text)
+        analysis_list, analysis_tokens = await ai_service.analyze_transaction(text)
         
-        if not analysis:
+        if not analysis_list:
             await processing_msg.edit_text(
                 f"✅ Tanildi: <i>{text}</i>\n\n"
                 f"❌ Tahlil qilib bo'lmadi. Iltimos, aniqroq aytib bering.",
@@ -94,25 +94,33 @@ async def process_voice(message: Message):
         
         # Token tracking
         total_tokens = whisper_tokens + analysis_tokens
-        await db.track_ai_usage(user_id, "voice_analysis", total_tokens)
+        await db.track_ai_usage(user_id, "groq", total_tokens)
         
-        # Tranzaksiyani saqlash
-        success = await db.add_transaction(
-            user_id=user_id,
-            trans_type=analysis.get("type", "expense"),
-            amount=float(analysis.get("amount", 0)),
-            category=analysis.get("category", "Boshqa"),
-            description=analysis.get("description", text)
-        )
+        # Har bir tranzaksiyani saqlash
+        saved_count = 0
+        results_text = ""
         
-        if success:
-            trans_type_emoji = "💵" if analysis["type"] == "income" else "💸"
+        for analysis in analysis_list:
+            success = await db.add_transaction(
+                user_id=user_id,
+                trans_type=analysis.get("type", "expense"),
+                amount=float(analysis.get("amount", 0)),
+                category=analysis.get("category", "Boshqa"),
+                description=analysis.get("description", "")
+            )
+            
+            if success:
+                saved_count += 1
+                trans_type_emoji = "💵" if analysis["type"] == "income" else "💸"
+                results_text += (
+                    f"{trans_type_emoji} {analysis.get('type', 'expense')}: "
+                    f"{analysis['amount']:,} so'm - {analysis['category']}\n"
+                )
+        
+        if saved_count > 0:
             await processing_msg.edit_text(
-                f"✅ <b>Saqlandi!</b>\n\n"
-                f"{trans_type_emoji} <b>Turi:</b> {analysis['type']}\n"
-                f"💰 <b>Summa:</b> {analysis['amount']:,} so'm\n"
-                f"📁 <b>Kategoriya:</b> {analysis['category']}\n"
-                f"📝 <b>Tavsif:</b> {analysis.get('description', text)}\n\n"
+                f"✅ <b>{saved_count} ta tranzaksiya saqlandi!</b>\n\n"
+                f"{results_text}\n"
                 f"🔢 Ishlatilgan: {total_tokens} token",
                 parse_mode="HTML"
             )
@@ -142,32 +150,40 @@ async def process_text_transaction(message: Message):
     
     try:
         # AI tahlil
-        analysis, tokens = await ai_service.analyze_transaction(text)
+        analysis_list, tokens = await ai_service.analyze_transaction(text)
         
-        if not analysis:
+        if not analysis_list:
             await processing_msg.edit_text("❌ Tahlil qilib bo'lmadi. Iltimos, aniqroq yozing.")
             return
         
         # Token tracking
-        await db.track_ai_usage(user_id, "text_analysis", tokens)
+        await db.track_ai_usage(user_id, "groq", tokens)
         
-        # Saqlash
-        success = await db.add_transaction(
-            user_id=user_id,
-            trans_type=analysis.get("type", "expense"),
-            amount=float(analysis.get("amount", 0)),
-            category=analysis.get("category", "Boshqa"),
-            description=analysis.get("description", text)
-        )
+        # Har bir tranzaksiyani saqlash
+        saved_count = 0
+        results_text = ""
         
-        if success:
-            trans_type_emoji = "💵" if analysis["type"] == "income" else "💸"
+        for analysis in analysis_list:
+            success = await db.add_transaction(
+                user_id=user_id,
+                trans_type=analysis.get("type", "expense"),
+                amount=float(analysis.get("amount", 0)),
+                category=analysis.get("category", "Boshqa"),
+                description=analysis.get("description", "")
+            )
+            
+            if success:
+                saved_count += 1
+                trans_type_emoji = "💵" if analysis["type"] == "income" else "💸"
+                results_text += (
+                    f"{trans_type_emoji} {analysis.get('type', 'expense')}: "
+                    f"{analysis['amount']:,} so'm - {analysis['category']}\n"
+                )
+        
+        if saved_count > 0:
             await processing_msg.edit_text(
-                f"✅ <b>Saqlandi!</b>\n\n"
-                f"{trans_type_emoji} <b>Turi:</b> {analysis['type']}\n"
-                f"💰 <b>Summa:</b> {analysis['amount']:,} so'm\n"
-                f"📁 <b>Kategoriya:</b> {analysis['category']}\n"
-                f"📝 <b>Tavsif:</b> {analysis.get('description', text)}",
+                f"✅ <b>{saved_count} ta tranzaksiya saqlandi!</b>\n\n"
+                f"{results_text}",
                 parse_mode="HTML"
             )
         else:
